@@ -37,6 +37,10 @@ export class OrderService {
     return order;
   }
 
+  getTotalCount() {
+     return this.ordersRepo.getCount()
+  }
+
   async getOrders(getOrdersDto: Partial<GetOrdersDto>) {
     try {
       console.log(getOrdersDto);

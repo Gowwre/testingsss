@@ -36,6 +36,10 @@ export class OrderRepository {
     });
   }
 
+  getCount(){
+    return this.orderRepo.count();
+  }
+
   getByCode(orderCode: string) {
     return this.orderRepo.findOne({
       where: {

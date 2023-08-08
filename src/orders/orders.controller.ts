@@ -41,13 +41,14 @@ export class OrderController {
           partnerName: partner.name,
         };
       }).slice(0,10);
+      const count  = await this.ordersService.getTotalCount();
 
       return {
         info: {
           total: result.length,
           page: getOrdersDto.page,
           limit: getOrdersDto.limit,
-          totalPages: Math.ceil(result.length / getOrdersDto.limit),
+          totalPages: Math.ceil( count/ getOrdersDto.limit),
           query: {
             search: {
               orderCodes: getOrdersDto.filter.orderCodes,
