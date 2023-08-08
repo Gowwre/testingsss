@@ -11,10 +11,14 @@ import { OrderService } from './services/orders.service';
 import { OrderStatus } from './entities/orders.entity';
 import { SearchAndFilterOrdersDto } from './dto/filter-and-search-orders.dto';
 import { GetOrdersDto } from './dto/get-orders.dto';
+import { PartnerService } from '../partners/services/partner.service';
 
 @Controller('orders')
 export class OrderController {
-  constructor(private ordersService: OrderService) {}
+  constructor(
+    private ordersService: OrderService,
+    private partnersService: PartnerService,
+  ) {}
 
   @Get('getList')
   getAllOrders() {
@@ -30,6 +34,14 @@ export class OrderController {
   async filterOrder(@Body() getOrdersDto: Partial<GetOrdersDto>) {
     try {
       const result = await this.ordersService.getOrders(getOrdersDto);
+      const partners = await this.partnersService.getAll();
+      const partnerIdsAndNames = partners.map((partner) => {
+        return {
+          partnerId: partner.id,
+          partnerName: partner.name,
+        };
+      });
+
       return {
         info: {
           total: result.length,
@@ -48,7 +60,7 @@ export class OrderController {
               createOrderDateRanges: getOrdersDto.filter.createOrderDateRange,
               purchaseCompleteDateRanges:
                 getOrdersDto.filter.purchaseCompleteDateRange,
-              partnerIds: getOrdersDto.filter.partnerIds,
+              partners: partnerIdsAndNames,
             },
           },
           sort: getOrdersDto.sort,
