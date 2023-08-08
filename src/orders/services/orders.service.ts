@@ -43,7 +43,7 @@ export class OrderService {
       const orders = await this.ordersRepo.betterGetOrders(getOrdersDto);
       for (const order of orders) {
         let orderItems = await this.orderItemsRepo.getOrderItemsFromOrder(
-          order.id,
+          order['orders_id'],
         );
         order.orderStatus = determineOrderStatus(orderItems);
       }

@@ -134,7 +134,7 @@ export class OrderRepository {
           PartnersEntity,
           'partner',
           'orders.partnerId = partner.id',
-        ).leftJoinAndSelect(OrderItemsEntity, 'orderItems', 'orderItems.orderId = orders.id');
+        );
 
       let conditionIsNotEmpty = Object.keys(condition).length > 0;
       if (conditionIsNotEmpty) {
