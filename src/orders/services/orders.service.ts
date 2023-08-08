@@ -40,7 +40,7 @@ export class OrderService {
   async getOrders(getOrdersDto: Partial<GetOrdersDto>) {
     try {
       console.log(getOrdersDto);
-      const orders = await this.ordersRepo.getOrders(getOrdersDto.filter);
+      const orders = await this.ordersRepo.betterGetOrders(getOrdersDto);
       for (const order of orders) {
         let orderItems = await this.orderItemsRepo.getOrderItemsFromOrder(
           order.id,
@@ -51,44 +51,18 @@ export class OrderService {
       let end = getOrdersDto.limit * getOrdersDto.page;
 
       if (
-        getOrdersDto.filter.orderStatusFilterOptions &&
-        getOrdersDto.filter.orderStatusFilterOptions.length > 0
+        getOrdersDto.filter.orderStatus &&
+        getOrdersDto.filter.orderStatus.length > 0
       ) {
         //This thing is slow as hell, only use temporarily until better solution is found
         return orders
           .filter((order) => {
-            return getOrdersDto.filter.orderStatusFilterOptions.includes(
-              order.orderStatus,
-            );
-          })
-          .sort((a, b) => {
-            if (getOrdersDto.sort.createdAt === 'desc') {
-              let dateA = new Date(a.createdAt);
-              let dateB = new Date(b.createdAt);
-              return dateB > dateA ? 1 : -1;
-            } else if (getOrdersDto.sort.createdAt === 'asc') {
-              let dateA = new Date(a.createdAt);
-              let dateB = new Date(b.createdAt);
-              return dateA > dateB ? 1 : -1;
-            }
+            return getOrdersDto.filter.orderStatus.includes(order.orderStatus);
           })
           .slice(start, end);
       }
 
-      return orders
-        .sort((a, b) => {
-          if (getOrdersDto.sort.createdAt === 'desc') {
-            let dateA = new Date(a.createdAt);
-            let dateB = new Date(b.createdAt);
-            return dateB > dateA ? 1 : -1;
-          } else if (getOrdersDto.sort.createdAt === 'asc') {
-            let dateA = new Date(a.createdAt);
-            let dateB = new Date(b.createdAt);
-            return dateA > dateB ? 1 : -1;
-          }
-        })
-
-        .slice(start, end);
+      return orders;
     } catch (e) {
       console.log(e.message);
     }

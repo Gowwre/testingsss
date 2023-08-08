@@ -30,7 +30,31 @@ export class OrderController {
   async filterOrder(@Body() getOrdersDto: Partial<GetOrdersDto>) {
     try {
       const result = await this.ordersService.getOrders(getOrdersDto);
-      return result;
+      return {
+        info: {
+          total: result.length,
+          page: getOrdersDto.page,
+          limit: getOrdersDto.limit,
+          totalPages: Math.ceil(result.length / getOrdersDto.limit),
+          query: {
+            search: {
+              orderCodes: getOrdersDto.filter.orderCodes,
+              buyerPhoneNumbers: getOrdersDto.filter.buyerPhoneNumbers,
+              buyerEmails: getOrdersDto.filter.buyerEmails,
+              purchaseNote: getOrdersDto.filter.purchaseNote,
+            },
+            filter: {
+              orderStatuses: getOrdersDto.filter.orderStatus,
+              createOrderDateRanges: getOrdersDto.filter.createOrderDateRange,
+              purchaseCompleteDateRanges:
+                getOrdersDto.filter.purchaseCompleteDateRange,
+              partnerIds: getOrdersDto.filter.partnerIds,
+            },
+          },
+          sort: getOrdersDto.sort,
+        },
+        data: result,
+      };
     } catch (e) {
       console.log(e.message);
     }

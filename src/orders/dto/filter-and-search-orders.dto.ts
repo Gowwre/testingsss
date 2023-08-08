@@ -6,12 +6,12 @@ export class SearchAndFilterOrdersDto {
   @IsArray()
   @IsOptional()
   @Transform(({ value }) => value.split(','))
-  partnerFilterOptions: string[];
+  partnerIds: string[];
 
   @IsArray()
   @IsOptional()
   @Transform(({ value }) => value.split(','))
-  orderStatusFilterOptions: OrderStatus[];
+  orderStatus: OrderStatus[];
 
   @IsOptional()
   @IsArray()

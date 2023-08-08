@@ -1,5 +1,5 @@
-import {GetOrdersDto} from "./get-orders.dto";
+import { GetOrdersDto } from './get-orders.dto';
 
-export class ReturnOrdersDto extends GetOrdersDto{
-    totalPages:number;
+export class ReturnOrdersDto extends GetOrdersDto {
+  totalPages: number;
 }

@@ -2,8 +2,8 @@ import { IsOptional } from 'class-validator';
 
 export class SortOrdersDto {
   @IsOptional()
-  createdAt: 'asc' | 'desc';
+  createdAt: 'ASC' | 'DESC';
 
   @IsOptional()
-  purchaseCompletedAt: 'asc' | 'desc';
+  purchaseCompletedAt: 'ASC' | 'DESC';
 }

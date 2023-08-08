@@ -1,12 +1,22 @@
-import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrdersEntity, OrderStatus } from '../entities/orders.entity';
-import { Brackets, Repository } from 'typeorm';
+import {
+  Between,
+  Brackets,
+  FindOptions,
+  In,
+  ObjectLiteral,
+  OrderByCondition,
+  Repository,
+} from 'typeorm';
 import { SearchAndFilterOrdersDto } from '../dto/filter-and-search-orders.dto';
 import {
   OrderItemsEntity,
   OrderItemsStatusEnum,
 } from '../../order-item/entities/order-items.entity';
+import { GetOrdersDto } from '../dto/get-orders.dto';
+import { PartnersEntity } from '../../partners/entities/partner.entity';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class OrderRepository {
@@ -43,9 +53,9 @@ export class OrderRepository {
         buyerPhoneNumbers,
         buyerEmails,
         purchaseNote,
-        partnerFilterOptions,
-        orderStatusFilterOptions,
-          createOrderDateRange,
+        partnerIds,
+        orderStatus,
+        createOrderDateRange,
       } = filterOptions;
 
       if (orderCodes && orderCodes.length > 0) {
@@ -84,23 +94,22 @@ export class OrderRepository {
         );
       }
 
-      if (partnerFilterOptions && partnerFilterOptions.length > 0) {
+      if (partnerIds && partnerIds.length > 0) {
         queryBuilder = queryBuilder.andWhere(
           'orders.partnerId IN (:...partnerFilterOptions)',
           {
-            partnerFilterOptions,
+            partnerIds: partnerIds,
           },
         );
       }
 
-      if(createOrderDateRange && createOrderDateRange.length > 0){
+      if (createOrderDateRange && createOrderDateRange.length > 0) {
         queryBuilder = queryBuilder.andWhere(
           'orders.createdAt BETWEEN :createOrderDateRange[0] AND :createOrderDateRange[1]',
           {
-            createOrderDateRange
+            createOrderDateRange,
           },
         );
-
       }
 
       // if (orderStatusFilterOptions && orderStatusFilterOptions.length > 0) {
@@ -111,6 +120,96 @@ export class OrderRepository {
     } catch (e) {
       console.log(e.message);
     }
+  }
+
+  async betterGetOrders(getOrdersDto: Partial<GetOrdersDto>) {
+    try {
+      const condition = this.getCondition(getOrdersDto);
+      const orderBy = this.getOrderBy(getOrdersDto);
+      let offset = (getOrdersDto.page - 1) * getOrdersDto.limit;
+
+      let query = this.orderRepo
+        .createQueryBuilder('orders')
+        .leftJoinAndSelect(
+          PartnersEntity,
+          'partner',
+          'orders.partnerId = partner.id',
+        );
+
+      let conditionIsNotEmpty = Object.keys(condition).length > 0;
+      if (conditionIsNotEmpty) {
+        query = query.where(condition);
+      }
+
+      const result = await query
+        .orderBy(orderBy)
+        .offset(offset)
+        .limit(getOrdersDto.limit)
+        .getMany();
+
+      return result;
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+
+  private getCondition(getOrdersDto: Partial<GetOrdersDto>) {
+    let condition: ObjectLiteral = {};
+
+    if (
+      getOrdersDto.filter.orderCodes &&
+      getOrdersDto.filter.orderCodes.length > 0
+    ) {
+      condition.orderCode = In(getOrdersDto.filter.orderCodes);
+    }
+
+    if (
+      getOrdersDto.filter.buyerPhoneNumbers &&
+      getOrdersDto.filter.buyerPhoneNumbers.length > 0
+    ) {
+      condition.buyerPhone = In(getOrdersDto.filter.buyerPhoneNumbers);
+    }
+
+    if (
+      getOrdersDto.filter.buyerEmails &&
+      getOrdersDto.filter.buyerEmails.length > 0
+    ) {
+      condition.buyerEmail = In(getOrdersDto.filter.buyerEmails);
+    }
+
+    if (
+      getOrdersDto.filter.purchaseNote &&
+      getOrdersDto.filter.purchaseNote !== ''
+    ) {
+      condition.purchaseNote = getOrdersDto.filter.purchaseNote;
+    }
+
+    console.log(getOrdersDto);
+    if (
+      getOrdersDto.filter.partnerIds &&
+      getOrdersDto.filter.partnerIds.length > 0
+    ) {
+      condition.partnerId = In(getOrdersDto.filter.partnerIds);
+    }
+
+    if (
+      getOrdersDto.filter.createOrderDateRange &&
+      getOrdersDto.filter.createOrderDateRange.length > 0
+    ) {
+      let startDate = getOrdersDto.filter.createOrderDateRange[0];
+      let endDate = getOrdersDto.filter.createOrderDateRange[1];
+      let temp: Date;
+      if (!endDate) endDate = startDate;
+      if (endDate < startDate) {
+        temp = startDate;
+        startDate = endDate;
+        endDate = temp;
+      }
+
+      condition.createdAt = Between(startDate, endDate);
+    }
+
+    return condition;
   }
 
   //Todo: Complete this
@@ -142,5 +241,19 @@ export class OrderRepository {
     }
 
     return query.getRawMany();
+  }
+
+  private getOrderBy(getOrdersDto: Partial<GetOrdersDto>) {
+    let orderBy: OrderByCondition = {};
+
+    if (getOrdersDto.sort.createdAt) {
+      orderBy['orders.created_at'] = getOrdersDto.sort.createdAt;
+    } else if (getOrdersDto.sort.purchaseCompletedAt) {
+      orderBy.purchaseCompletedAt = getOrdersDto.sort.purchaseCompletedAt;
+    } else {
+      orderBy.createdAt = 'DESC';
+    }
+
+    return orderBy;
   }
 }
