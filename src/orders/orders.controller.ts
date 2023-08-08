@@ -53,7 +53,7 @@ export class OrderController {
           },
           sort: getOrdersDto.sort,
         },
-        data: result,
+        result: result,
       };
     } catch (e) {
       console.log(e.message);

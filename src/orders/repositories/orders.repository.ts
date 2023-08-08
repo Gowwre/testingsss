@@ -145,7 +145,7 @@ export class OrderRepository {
         .orderBy(orderBy)
         .offset(offset)
         .limit(getOrdersDto.limit)
-        .getMany();
+        .getRawMany();
 
       return result;
     } catch (e) {
