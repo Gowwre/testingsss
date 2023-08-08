@@ -40,7 +40,7 @@ export class OrderController {
           partnerId: partner.id,
           partnerName: partner.name,
         };
-      });
+      }).slice(0,10);
 
       return {
         info: {
@@ -60,6 +60,7 @@ export class OrderController {
               createOrderDateRanges: getOrdersDto.filter.createOrderDateRange,
               purchaseCompleteDateRanges:
                 getOrdersDto.filter.purchaseCompleteDateRange,
+              partnerSelected:getOrdersDto.filter.partnerIds,
               partners: partnerIdsAndNames,
             },
           },
