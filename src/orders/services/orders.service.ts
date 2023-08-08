@@ -5,6 +5,7 @@ import { determineOrderStatus } from '../helpers/status-helper';
 import { OrderStatus } from '../entities/orders.entity';
 import { SearchAndFilterOrdersDto } from '../dto/filter-and-search-orders.dto';
 import { GetOrdersDto } from '../dto/get-orders.dto';
+import {determineFastShipping} from "../helpers/fast-shippping-helper";
 
 @Injectable()
 export class OrderService {
@@ -38,7 +39,7 @@ export class OrderService {
   }
 
   getTotalCount() {
-     return this.ordersRepo.getCount()
+    return this.ordersRepo.getCount();
   }
 
   async getOrders(getOrdersDto: Partial<GetOrdersDto>) {
@@ -50,6 +51,7 @@ export class OrderService {
           order['orders_id'],
         );
         order.orderStatus = determineOrderStatus(orderItems);
+        order.isFastShipping = determineFastShipping(orderItems);
       }
       let start = (getOrdersDto.page - 1) * getOrdersDto.limit;
       let end = getOrdersDto.limit * getOrdersDto.page;

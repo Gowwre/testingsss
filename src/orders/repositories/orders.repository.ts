@@ -36,7 +36,7 @@ export class OrderRepository {
     });
   }
 
-  getCount(){
+  getCount() {
     return this.orderRepo.count();
   }
 
@@ -47,89 +47,10 @@ export class OrderRepository {
       },
     });
   }
-
-  async getOrders(filterOptions: Partial<SearchAndFilterOrdersDto>) {
-    try {
-      let queryBuilder = this.orderRepo.createQueryBuilder('orders');
-
-      const {
-        orderCodes,
-        buyerPhoneNumbers,
-        buyerEmails,
-        purchaseNote,
-        partnerIds,
-        orderStatus,
-        createOrderDateRange,
-      } = filterOptions;
-
-      if (orderCodes && orderCodes.length > 0) {
-        queryBuilder = queryBuilder.andWhere(
-          'orders.orderCode IN (:...orderCodes)',
-          {
-            orderCodes,
-          },
-        );
-      }
-
-      if (buyerPhoneNumbers && buyerPhoneNumbers.length > 0) {
-        queryBuilder = queryBuilder.andWhere(
-          'orders.buyerPhone IN (:...buyerPhoneNumbers)',
-          {
-            buyerPhoneNumbers,
-          },
-        );
-      }
-
-      if (buyerEmails && buyerEmails.length > 0) {
-        queryBuilder = queryBuilder.andWhere(
-          'orders.buyerEmail IN (:...buyerEmails)',
-          {
-            buyerEmails,
-          },
-        );
-      }
-
-      if (purchaseNote && purchaseNote !== '') {
-        queryBuilder = queryBuilder.andWhere(
-          'orders.purchaseNote = :purchaseNote',
-          {
-            purchaseNote,
-          },
-        );
-      }
-
-      if (partnerIds && partnerIds.length > 0) {
-        queryBuilder = queryBuilder.andWhere(
-          'orders.partnerId IN (:...partnerFilterOptions)',
-          {
-            partnerIds: partnerIds,
-          },
-        );
-      }
-
-      if (createOrderDateRange && createOrderDateRange.length > 0) {
-        queryBuilder = queryBuilder.andWhere(
-          'orders.createdAt BETWEEN :createOrderDateRange[0] AND :createOrderDateRange[1]',
-          {
-            createOrderDateRange,
-          },
-        );
-      }
-
-      // if (orderStatusFilterOptions && orderStatusFilterOptions.length > 0) {
-      //   //do something
-      // }
-
-      return await queryBuilder.getMany();
-    } catch (e) {
-      console.log(e.message);
-    }
-  }
-
   async betterGetOrders(getOrdersDto: Partial<GetOrdersDto>) {
     try {
-      const condition = this.getCondition(getOrdersDto);
-      const orderBy = this.getOrderBy(getOrdersDto);
+      const whereCondition = this.getWhereCondition(getOrdersDto);
+      const orderByCondition = this.getOrderByCondition(getOrdersDto);
       let offset = (getOrdersDto.page - 1) * getOrdersDto.limit;
 
       let query = this.orderRepo
@@ -138,15 +59,15 @@ export class OrderRepository {
           PartnersEntity,
           'partner',
           'orders.partnerId = partner.id',
-        );
+        )
 
-      let conditionIsNotEmpty = Object.keys(condition).length > 0;
+      let conditionIsNotEmpty = Object.keys(whereCondition).length > 0;
       if (conditionIsNotEmpty) {
-        query = query.where(condition);
+        query = query.where(whereCondition);
       }
 
       const result = await query
-        .orderBy(orderBy)
+        .orderBy(orderByCondition)
         .offset(offset)
         .limit(getOrdersDto.limit)
         .getRawMany();
@@ -157,7 +78,7 @@ export class OrderRepository {
     }
   }
 
-  private getCondition(getOrdersDto: Partial<GetOrdersDto>) {
+  private getWhereCondition(getOrdersDto: Partial<GetOrdersDto>) {
     let condition: ObjectLiteral = {};
 
     if (
@@ -247,17 +168,17 @@ export class OrderRepository {
     return query.getRawMany();
   }
 
-  private getOrderBy(getOrdersDto: Partial<GetOrdersDto>) {
-    let orderBy: OrderByCondition = {};
+  private getOrderByCondition(getOrdersDto: Partial<GetOrdersDto>) {
+    let orderByCondition: OrderByCondition = {};
 
     if (getOrdersDto.sort.createdAt) {
-      orderBy['orders.created_at'] = getOrdersDto.sort.createdAt;
+      orderByCondition['orders.created_at'] = getOrdersDto.sort.createdAt;
     } else if (getOrdersDto.sort.purchaseCompletedAt) {
-      orderBy.purchaseCompletedAt = getOrdersDto.sort.purchaseCompletedAt;
+      orderByCondition.purchaseCompletedAt = getOrdersDto.sort.purchaseCompletedAt;
     } else {
-      orderBy.createdAt = 'DESC';
+      orderByCondition.createdAt = 'DESC';
     }
 
-    return orderBy;
+    return orderByCondition;
   }
 }

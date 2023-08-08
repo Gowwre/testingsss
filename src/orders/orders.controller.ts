@@ -35,20 +35,22 @@ export class OrderController {
     try {
       const result = await this.ordersService.getOrders(getOrdersDto);
       const partners = await this.partnersService.getAll();
-      const partnerIdsAndNames = partners.map((partner) => {
-        return {
-          partnerId: partner.id,
-          partnerName: partner.name,
-        };
-      }).slice(0,10);
-      const count  = await this.ordersService.getTotalCount();
+      const partnerIdsAndNames = partners
+        .map((partner) => {
+          return {
+            partnerId: partner.id,
+            partnerName: partner.name,
+          };
+        })
+        .slice(0, 10);
+      const count = await this.ordersService.getTotalCount();
 
       return {
         info: {
           total: result.length,
           page: getOrdersDto.page,
           limit: getOrdersDto.limit,
-          totalPages: Math.ceil( count/ getOrdersDto.limit),
+          totalPages: Math.ceil(count / getOrdersDto.limit),
           query: {
             search: {
               orderCodes: getOrdersDto.filter.orderCodes,
@@ -61,7 +63,7 @@ export class OrderController {
               createOrderDateRanges: getOrdersDto.filter.createOrderDateRange,
               purchaseCompleteDateRanges:
                 getOrdersDto.filter.purchaseCompleteDateRange,
-              partnerSelected:getOrdersDto.filter.partnerIds,
+              partnerSelected: getOrdersDto.filter.partnerIds,
               partners: partnerIdsAndNames,
             },
           },

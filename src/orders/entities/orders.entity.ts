@@ -158,4 +158,6 @@ export class OrdersEntity {
   orderStatus: OrderStatus;
 
   orderItems?: OrderItemsEntity[];
+
+  isFastShipping: boolean;
 }
