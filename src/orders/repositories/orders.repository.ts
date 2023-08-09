@@ -68,9 +68,35 @@ export class OrderRepository {
 
       const result = await query
         .orderBy(orderByCondition)
-        .offset(offset)
-        .limit(getOrdersDto.limit)
         .getRawMany();
+
+      return result;
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+
+  async getAllFilteredOrders(getOrdersDto: Partial<GetOrdersDto>) {
+    try {
+      const whereCondition = this.getWhereCondition(getOrdersDto);
+      const orderByCondition = this.getOrderByCondition(getOrdersDto);
+
+      let query = this.orderRepo
+          .createQueryBuilder('orders')
+          .leftJoinAndSelect(
+              PartnersEntity,
+              'partner',
+              'orders.partnerId = partner.id',
+          )
+
+      let conditionIsNotEmpty = Object.keys(whereCondition).length > 0;
+      if (conditionIsNotEmpty) {
+        query = query.where(whereCondition);
+      }
+
+      const result = await query
+          .orderBy(orderByCondition)
+          .getRawMany();
 
       return result;
     } catch (e) {
