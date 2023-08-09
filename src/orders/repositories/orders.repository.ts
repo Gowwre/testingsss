@@ -2,18 +2,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OrdersEntity, OrderStatus } from '../entities/orders.entity';
 import {
   Between,
-  Brackets,
-  FindOptions,
   In,
   ObjectLiteral,
   OrderByCondition,
   Repository,
 } from 'typeorm';
-import { SearchAndFilterOrdersDto } from '../dto/filter-and-search-orders.dto';
-import {
-  OrderItemsEntity,
-  OrderItemsStatusEnum,
-} from '../../order-item/entities/order-items.entity';
 import { GetOrdersDto } from '../dto/get-orders.dto';
 import { PartnersEntity } from '../../partners/entities/partner.entity';
 import { Injectable } from '@nestjs/common';
@@ -59,16 +52,14 @@ export class OrderRepository {
           PartnersEntity,
           'partner',
           'orders.partnerId = partner.id',
-        )
+        );
 
       let conditionIsNotEmpty = Object.keys(whereCondition).length > 0;
       if (conditionIsNotEmpty) {
         query = query.where(whereCondition);
       }
 
-      const result = await query
-        .orderBy(orderByCondition)
-        .getRawMany();
+      const result = await query.orderBy(orderByCondition).getRawMany();
 
       return result;
     } catch (e) {
@@ -82,21 +73,19 @@ export class OrderRepository {
       const orderByCondition = this.getOrderByCondition(getOrdersDto);
 
       let query = this.orderRepo
-          .createQueryBuilder('orders')
-          .leftJoinAndSelect(
-              PartnersEntity,
-              'partner',
-              'orders.partnerId = partner.id',
-          )
+        .createQueryBuilder('orders')
+        .leftJoinAndSelect(
+          PartnersEntity,
+          'partner',
+          'orders.partnerId = partner.id',
+        );
 
       let conditionIsNotEmpty = Object.keys(whereCondition).length > 0;
       if (conditionIsNotEmpty) {
         query = query.where(whereCondition);
       }
 
-      const result = await query
-          .orderBy(orderByCondition)
-          .getRawMany();
+      const result = await query.orderBy(orderByCondition).getRawMany();
 
       return result;
     } catch (e) {
@@ -160,38 +149,30 @@ export class OrderRepository {
       condition.createdAt = Between(startDate, endDate);
     }
 
+    if (
+      getOrdersDto.filter.paymentCompleteDateRange &&
+      getOrdersDto.filter.paymentCompleteDateRange.length > 0
+    ) {
+      let startDate = getOrdersDto.filter.paymentCompleteDateRange[0];
+      let endDate = getOrdersDto.filter.paymentCompleteDateRange[1];
+      let temp: Date;
+      if (!endDate) endDate = startDate;
+      if (endDate < startDate) {
+        temp = startDate;
+        startDate = endDate;
+        endDate = temp;
+      }
+      condition.paymentCompletedAt = Between(startDate, endDate);
+    }
+
+
+
     return condition;
   }
 
   //Todo: Complete this
   filterByStatus(options: OrderStatus[]) {
-    let query = this.orderRepo
-      .createQueryBuilder('orders')
-      .innerJoin(
-        OrderItemsEntity,
-        'orderItems',
-        'orders.id = orderItems.orderId',
-      );
-    if (options.includes('PROCESSING')) {
-      query = query.where(new Brackets((qb) => {}));
-    }
-    if (options.includes('PROCESSED')) {
-      query = query.orWhere(new Brackets((qb) => {}));
-    }
 
-    if (options.includes('INTERNATIONAL_TRACKING_AVAILABLE')) {
-      query = query.orWhere(new Brackets((qb) => {}));
-    }
-
-    if (options.includes('DELIVERED')) {
-      query = query.orWhere(new Brackets((qb) => {}));
-    }
-
-    if (options.includes('CANCELLED')) {
-      query = query.orWhere(new Brackets((qb) => {}));
-    }
-
-    return query.getRawMany();
   }
 
   private getOrderByCondition(getOrdersDto: Partial<GetOrdersDto>) {
@@ -200,7 +181,8 @@ export class OrderRepository {
     if (getOrdersDto.sort.createdAt) {
       orderByCondition['orders.created_at'] = getOrdersDto.sort.createdAt;
     } else if (getOrdersDto.sort.purchaseCompletedAt) {
-      orderByCondition.purchaseCompletedAt = getOrdersDto.sort.purchaseCompletedAt;
+      orderByCondition['orders.payment_completed_at'] =
+        getOrdersDto.sort.purchaseCompletedAt;
     } else {
       orderByCondition.createdAt = 'DESC';
     }

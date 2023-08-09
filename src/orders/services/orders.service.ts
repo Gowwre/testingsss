@@ -5,7 +5,7 @@ import { determineOrderStatus } from '../helpers/status-helper';
 import { OrderStatus } from '../entities/orders.entity';
 import { SearchAndFilterOrdersDto } from '../dto/filter-and-search-orders.dto';
 import { GetOrdersDto } from '../dto/get-orders.dto';
-import {determineFastShipping} from "../helpers/fast-shippping-helper";
+import { determineFastShipping } from '../helpers/fast-shippping-helper';
 
 @Injectable()
 export class OrderService {
@@ -68,7 +68,7 @@ export class OrderService {
           .slice(start, end);
       }
 
-      return orders.slice(start,end);
+      return orders.slice(start, end);
     } catch (e) {
       console.log(e.message);
     }
@@ -80,21 +80,20 @@ export class OrderService {
       const orders = await this.ordersRepo.getAllFilteredOrders(getOrdersDto);
       for (const order of orders) {
         let orderItems = await this.orderItemsRepo.getOrderItemsFromOrder(
-            order['orders_id'],
+          order['orders_id'],
         );
         order.orderStatus = determineOrderStatus(orderItems);
         order.isFastShipping = determineFastShipping(orderItems);
       }
 
       if (
-          getOrdersDto.filter.orderStatus &&
-          getOrdersDto.filter.orderStatus.length > 0
+        getOrdersDto.filter.orderStatus &&
+        getOrdersDto.filter.orderStatus.length > 0
       ) {
         //This thing is slow as hell, only use temporarily until better solution is found
-        return orders
-            .filter((order) => {
-              return getOrdersDto.filter.orderStatus.includes(order.orderStatus);
-            })
+        return orders.filter((order) => {
+          return getOrdersDto.filter.orderStatus.includes(order.orderStatus);
+        });
       }
       return orders;
     } catch (e) {

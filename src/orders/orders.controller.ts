@@ -12,6 +12,7 @@ import { OrderStatus } from './entities/orders.entity';
 import { SearchAndFilterOrdersDto } from './dto/filter-and-search-orders.dto';
 import { GetOrdersDto } from './dto/get-orders.dto';
 import { PartnerService } from '../partners/services/partner.service';
+import { ApiBody, PartialType } from '@nestjs/swagger';
 
 @Controller('orders')
 export class OrderController {
@@ -30,11 +31,14 @@ export class OrderController {
     return this.ordersService.getDetails(orderCode);
   }
 
+  @ApiBody({ type: PartialType(GetOrdersDto) })
   @Post('getFilteredList')
   async filterOrder(@Body() getOrdersDto: Partial<GetOrdersDto>) {
     try {
       const result = await this.ordersService.getOrders(getOrdersDto);
-      const allFiltered = await this.ordersService.getAllFilteredOrders(getOrdersDto)
+      const allFiltered = await this.ordersService.getAllFilteredOrders(
+        getOrdersDto,
+      );
       const partners = await this.partnersService.getAll();
       const partnerIdsAndNames = partners
         .map((partner) => {
@@ -62,7 +66,7 @@ export class OrderController {
               orderStatuses: getOrdersDto.filter.orderStatus,
               createOrderDateRanges: getOrdersDto.filter.createOrderDateRange,
               purchaseCompleteDateRanges:
-                getOrdersDto.filter.purchaseCompleteDateRange,
+                getOrdersDto.filter.paymentCompleteDateRange,
               partnerSelected: getOrdersDto.filter.partnerIds,
               partners: partnerIdsAndNames,
             },
