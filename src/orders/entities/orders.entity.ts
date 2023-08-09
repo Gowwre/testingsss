@@ -155,6 +155,13 @@ export class OrdersEntity {
   })
   updatedAt: Date | null;
 
+  @Column('timestamp',{
+    name:'payment_completed_at',
+    nullable: true,
+    default: () => "'0000-00-00 00:00:00'",
+  })
+  paymentCompletedAt: Date | null;
+
   orderStatus: OrderStatus;
 
   orderItems?: OrderItemsEntity[];

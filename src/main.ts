@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import { TransformInterceptor } from './transform.interceptor';
 import { UncaughtExceptionFilter } from './uncaught-exception.filter';
 import SentryTransport from 'winston-transport-sentry-node';
+import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
 
 async function bootstrap() {
   const instance = createLogger({
@@ -46,6 +47,13 @@ async function bootstrap() {
       instance,
     }),
   });
+
+  const config = new DocumentBuilder()
+      .setTitle('Seller Center')
+      .build()
+
+  const document = SwaggerModule.createDocument(app,config)
+  SwaggerModule.setup('api',app,document)
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new UncaughtExceptionFilter());
