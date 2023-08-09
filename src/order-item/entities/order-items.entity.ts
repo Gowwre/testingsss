@@ -182,4 +182,11 @@ export class OrderItemsEntity {
     default: () => "'0000-00-00 00:00:00'",
   })
   updatedAt: Date | null;
+
+  @Column({
+    type:'varchar',
+    length:50,
+    name:'store_product_code'
+  })
+  storeProductCode:string
 }
