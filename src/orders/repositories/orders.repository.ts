@@ -180,9 +180,9 @@ export class OrderRepository {
 
     if (getOrdersDto.sort.createdAt) {
       orderByCondition['orders.created_at'] = getOrdersDto.sort.createdAt;
-    } else if (getOrdersDto.sort.purchaseCompletedAt) {
+    } else if (getOrdersDto.sort.paymentCompletedAt) {
       orderByCondition['orders.payment_completed_at'] =
-        getOrdersDto.sort.purchaseCompletedAt;
+        getOrdersDto.sort.paymentCompletedAt;
     } else {
       orderByCondition.createdAt = 'DESC';
     }

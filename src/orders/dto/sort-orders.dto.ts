@@ -5,5 +5,5 @@ export class SortOrdersDto {
   createdAt: 'ASC' | 'DESC';
 
   @IsOptional()
-  purchaseCompletedAt: 'ASC' | 'DESC';
+  paymentCompletedAt: 'ASC' | 'DESC';
 }
