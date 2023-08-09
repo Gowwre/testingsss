@@ -65,7 +65,7 @@ export class OrderController {
             filter: {
               orderStatuses: getOrdersDto.filter.orderStatus,
               createOrderDateRanges: getOrdersDto.filter.createOrderDateRange,
-              purchaseCompleteDateRanges:
+              paymentCompleteDateRanges:
                 getOrdersDto.filter.paymentCompleteDateRange,
               partnerSelected: getOrdersDto.filter.partnerIds,
               partners: partnerIdsAndNames,
