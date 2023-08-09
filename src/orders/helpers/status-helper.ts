@@ -4,22 +4,27 @@ import {
 } from '../../order-item/entities/order-items.entity';
 import { OrderStatus } from '../entities/orders.entity';
 
+function getValidItems(items: OrderItemsEntity[]) {
+  return items.filter((item) => !item.storeProductCode);
+}
+
 function hasStatus(items: OrderItemsEntity[], status: OrderItemsStatusEnum) {
-  return items.some((item) => item.statusId === status);
+
+  return getValidItems(items).some((item) => item.statusId === status);
 }
 
 function allHaveStatus(
   items: OrderItemsEntity[],
   status: OrderItemsStatusEnum,
 ) {
-  return items.every((item) => item.statusId === status);
+  return getValidItems(items).every((item) => item.statusId === status);
 }
 
 function hasOnlyStatuses(
   items: OrderItemsEntity[],
   statuses: OrderItemsStatusEnum[],
 ) {
-  return items.every((item) => statuses.includes(item.statusId));
+  return getValidItems(items).every((item) => statuses.includes(item.statusId));
 }
 
 //TODO: Look at this later when feedback is available

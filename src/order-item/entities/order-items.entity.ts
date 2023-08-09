@@ -186,7 +186,8 @@ export class OrderItemsEntity {
   @Column({
     type:'varchar',
     length:50,
-    name:'store_product_code'
+    name:'store_product_code',
+    nullable:true
   })
   storeProductCode:string
 }
