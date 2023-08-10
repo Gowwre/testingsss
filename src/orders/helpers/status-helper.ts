@@ -29,7 +29,7 @@ function hasOnlyStatuses(
 
 //TODO: Look at this later when feedback is available
 function isNew(items: OrderItemsEntity[]) {
-  return items.every((item) => item.statusId === null);
+  return items.every((item) => !item.purchasesNote);
 }
 
 export function isProcessing(items: OrderItemsEntity[]) {

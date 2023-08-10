@@ -184,7 +184,7 @@ export class OrderRepository {
       orderByCondition['orders.payment_completed_at'] =
         getOrdersDto.sort.paymentCompletedAt;
     } else {
-      orderByCondition.createdAt = 'DESC';
+      orderByCondition['orders.payment_completed_at'] = 'ASC';
     }
 
     return orderByCondition;
