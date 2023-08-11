@@ -3,9 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { OrdersModule } from './orders/orders.module';
+import { OrdersModule } from './order/orders.module';
+import { BaseRepository } from './base/repositories/base.repository';
 import { OrderItemModule } from './order-item/order-item.module';
-import { PartnersModule } from './partners/partners.module';
+import { PartnerModule } from './partner/partner.module';
 
 @Module({
   imports: [
@@ -23,14 +24,17 @@ import { PartnersModule } from './partners/partners.module';
         autoLoadEntities: true,
         synchronize: true,
         logging: true,
+        extra: {
+          decimalNumbers: true,
+        },
       }),
       inject: [ConfigService],
     }),
     OrdersModule,
     OrderItemModule,
-    PartnersModule,
+    PartnerModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, BaseRepository],
 })
 export class AppModule {}

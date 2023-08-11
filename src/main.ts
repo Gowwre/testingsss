@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { utilities, WinstonModule } from 'nest-winston';
 import { createLogger, format, transports } from 'winston';
@@ -47,14 +47,25 @@ async function bootstrap() {
       instance,
     }),
   });
-
-  const config = new DocumentBuilder().setTitle('Seller Center').build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      skipMissingProperties: true,
+      whitelist: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new UncaughtExceptionFilter());
+
+  const config = new DocumentBuilder()
+    .setTitle('Seller Center')
+    .setDescription('Seller system')
+    .setVersion('1.0')
+    .addTag('woka')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
   await app.listen(3003);
 }
 
